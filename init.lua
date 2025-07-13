@@ -8,6 +8,7 @@ vim.opt.guicursor = ""
 -- Make line numbers default
 vim.o.number = true
 vim.o.relativenumber = true
+vim.opt.colorcolumn="80"
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 -- vim.o.mouse = 'a'
@@ -94,7 +95,22 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.hl.on_yank()
   end,
 })
-
+vim.diagnostic.config({
+    update_in_insert = true,  -- Ensure diagnostics update in insert mode
+    virtual_text = {
+        prefix = '●', -- Can use different symbols like 'x' for errors
+        spacing = 4,   -- Space between the text and the diagnostic
+    },
+    float = {
+        focusable = false,
+        style = "minimal",
+        border = "rounded",
+        source = "always",  -- Show source (e.g., LSP server name)
+        header = "",
+        prefix = "",
+    },
+    severity_sort = true,  -- Ensure diagnostics are sorted by severity (errors > warnings > info)
+})
 -- [[ Install `lazy.nvim` plugin manager ]]
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -195,38 +211,17 @@ require('lazy').setup({
     end,
   },
 
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
 require 'riasgremory.plugins.autopairs',
-require 'riasgremory.plugins.ollama',
 require 'riasgremory.plugins.treesitter',
 require 'riasgremory.plugins.telescope',
 require "riasgremory.plugins.colors",
-require "riasgremory.plugins.harpoon",
 require "riasgremory.plugins.undotree",
-require "riasgremory.plugins.fugitive",
 require "riasgremory.plugins.lsp",
 require "riasgremory.plugins.cloak",
-require "riasgremory.plugins.conform",
 require "riasgremory.plugins.peek",
 require "riasgremory.plugins.snippets",
 require "riasgremory.plugins.trouble",
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
-  --
-  -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
-  -- Or use telescope!
-  -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
-  -- you can continue same window with `<space>sr` which resumes last telescope search
+require "riasgremory.plugins.jupytext",
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {

@@ -34,6 +34,7 @@ return {
                 "lua_ls",
                 "rust_analyzer",
                 "pyright",
+                "pylsp",
                 "clangd",
             },
             handlers = {
@@ -78,20 +79,45 @@ return {
                         }
                     }
                 end,
-pyright = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.pyright.setup({
-                        capabilities = capabilities,
-                        settings = {
-                            python = {
-                                analysis = {
-                                    typeCheckingMode = "basic", -- Options: off, basic, strict
-                                    autoImportCompletions = true,
-                                }
-                            }
-                        }
-                    })
-                end,
+pylsp = function()
+    local lspconfig = require("lspconfig")
+
+    -- Ensure capabilities from nvim-cmp are included
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    local cmp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+    if cmp_ok then
+        capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
+    end
+
+    -- Define keymaps for diagnostics (example)
+    local on_attach = function(client, bufnr)
+        local opts = { noremap = true, silent = true, buffer = bufnr }
+        vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+        vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, opts)
+    end
+
+    -- Explicitly specify the command to run pylsp
+    lspconfig.pylsp.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        cmd = { "pylsp" },  -- Use pylsp instead of pyright-langserver
+        settings = {
+            pylsp = {
+                plugins = {
+                    pyflakes = { enabled = true },
+                    pylint = { enabled = false },
+                    jedi_completion = { enabled = true },
+                    rope_completion = { enabled = true },
+                    yapf = { enabled = true },
+                    autopep8 = { enabled = false },
+                    flake8 = { enabled = true },
+                }
+            }
+        }
+    })
+end,
 
                 -- C LSP setup (Clangd)
                 clangd = function()
